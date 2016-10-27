@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_GLViewer_t {
-    QByteArrayData data[10];
-    char stringdata[121];
+    QByteArrayData data[9];
+    char stringdata[106];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -37,13 +37,11 @@ QT_MOC_LITERAL(4, 33, 16),
 QT_MOC_LITERAL(5, 50, 16),
 QT_MOC_LITERAL(6, 67, 12),
 QT_MOC_LITERAL(7, 80, 12),
-QT_MOC_LITERAL(8, 93, 12),
-QT_MOC_LITERAL(9, 106, 14)
+QT_MOC_LITERAL(8, 93, 12)
     },
     "GLViewer\0xRotationChanged\0\0angle\0"
     "yRotationChanged\0zRotationChanged\0"
-    "setXRotation\0setYRotation\0setZRotation\0"
-    "calculateAngle"
+    "setXRotation\0setYRotation\0setZRotation"
 };
 #undef QT_MOC_LITERAL
 
@@ -53,7 +51,7 @@ static const uint qt_meta_data_GLViewer[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       7,   14, // methods
+       6,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -61,15 +59,14 @@ static const uint qt_meta_data_GLViewer[] = {
        3,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    1,   49,    2, 0x06 /* Public */,
-       4,    1,   52,    2, 0x06 /* Public */,
-       5,    1,   55,    2, 0x06 /* Public */,
+       1,    1,   44,    2, 0x06 /* Public */,
+       4,    1,   47,    2, 0x06 /* Public */,
+       5,    1,   50,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       6,    1,   58,    2, 0x0a /* Public */,
-       7,    1,   61,    2, 0x0a /* Public */,
-       8,    1,   64,    2, 0x0a /* Public */,
-       9,    0,   67,    2, 0x0a /* Public */,
+       6,    1,   53,    2, 0x0a /* Public */,
+       7,    1,   56,    2, 0x0a /* Public */,
+       8,    1,   59,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::Int,    3,
@@ -80,7 +77,6 @@ static const uint qt_meta_data_GLViewer[] = {
     QMetaType::Void, QMetaType::Int,    3,
     QMetaType::Void, QMetaType::Int,    3,
     QMetaType::Void, QMetaType::Int,    3,
-    QMetaType::Void,
 
        0        // eod
 };
@@ -96,7 +92,6 @@ void GLViewer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, vo
         case 3: _t->setXRotation((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 4: _t->setYRotation((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 5: _t->setZRotation((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 6: _t->calculateAngle(); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -148,13 +143,13 @@ int GLViewer::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 7)
+        if (_id < 6)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 7;
+        _id -= 6;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 7)
+        if (_id < 6)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 7;
+        _id -= 6;
     }
     return _id;
 }

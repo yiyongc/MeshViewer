@@ -45,15 +45,16 @@ private:
 	float xTrans, yTrans;
 	float scaleSize;
 	QPoint lastPos;
-	double mouseMovementAngle;
+
 	int dx, dy;
-	int rotateZState = 0;
+	int rotateZState = -1;
+	bool clockWise = false;
 
 	public slots:
 	void setXRotation(int angle);
 	void setYRotation(int angle);
 	void setZRotation(int angle);
-	void calculateAngle();
+
 
 
 signals:

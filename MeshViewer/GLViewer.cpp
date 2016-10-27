@@ -3,8 +3,11 @@
 #include <QMouseEvent>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <chrono>
+#include <thread>
+#include <qvector2d.h>
 
-GLViewer::GLViewer(QWidget* parent) : xRot(0), yRot(0), zRot(0), scaleSize(1.0), xTrans(0), yTrans(0), mouseMovementAngle(0){
+GLViewer::GLViewer(QWidget* parent) : xRot(0), yRot(0), zRot(0), scaleSize(1.0), xTrans(0), yTrans(0) {
 
 	//Updates GL Widget every 10ms
 	QTimer* timer = new QTimer(this);
@@ -73,20 +76,57 @@ void GLViewer::qNormalizeAngle(int &angle)
 
 void GLViewer::mousePressEvent(QMouseEvent *event) { 
 	lastPos = event->pos();
-	rotateZState = 0;
-	//if (event->button() == Qt::LeftButton) {
-	//	setXRotation(xRot+30);
-	//}
-	//if (event->button() == Qt::RightButton) {
-	//	setYRotation(yRot + 30);
-	//}
-	//if (event->button() == Qt::MiddleButton) {
-	//	setZRotation(zRot + 30);
-	//}
+	
+	if (event->buttons() & Qt::LeftButton) {
+
+		float mouseMovementAngle = 0;
+
+		QVector2D startPoint(this->mapFromGlobal(QCursor::pos()).x(), this->mapFromGlobal(QCursor::pos()).y());
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(120));
+		QVector2D firstPoint(this->mapFromGlobal(QCursor::pos()).x(), this->mapFromGlobal(QCursor::pos()).y());
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(120));
+		QVector2D secondPoint(this->mapFromGlobal(QCursor::pos()).x(), this->mapFromGlobal(QCursor::pos()).y());
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(120));
+		QVector2D thirdPoint(this->mapFromGlobal(QCursor::pos()).x(), this->mapFromGlobal(QCursor::pos()).y());
+
+		QVector2D vector1 = firstPoint - startPoint;
+		QVector2D vector2 = secondPoint - startPoint;
+		QVector2D vector3 = thirdPoint - startPoint;
+
+
+		float lengthVector1 = vector1.length();
+		float lengthVector2 = vector2.length();
+		float lengthVector3 = vector3.length();
+
+		float angle1 = acos(QVector2D::dotProduct(vector1, vector2) / lengthVector1 / lengthVector2);
+		float angle2 = acos(QVector2D::dotProduct(vector3, vector2) / lengthVector3 / lengthVector2);
+
+		mouseMovementAngle = angle1 + angle2;
+
+		if (mouseMovementAngle > 0.10) {
+			rotateZState = 1;
+
+			//determine direction of mouse movement
+			float directionCheck = vector1.x() * vector3.y() - vector1.y() * vector3.x();
+
+			if (directionCheck < 0)
+				clockWise = false;
+			else
+				clockWise = true;
+		}
+		else
+			rotateZState = 0;
+	}
 }
 
 void GLViewer::mouseReleaseEvent(QMouseEvent *event) {
+	rotateZState = -1;
 }
+
+
 void GLViewer::mouseMoveEvent(QMouseEvent *event) {
 	dx = event->x() - lastPos.x();
 	dy = event->y() - lastPos.y();
@@ -99,26 +139,20 @@ void GLViewer::mouseMoveEvent(QMouseEvent *event) {
 	//Change rotation state and allow rotations
 
 	//Rotation
-	if (event->buttons() & Qt::LeftButton) {
-		
-
-		QTimer* angleTimer = new QTimer(this);
-		connect(angleTimer, SIGNAL(timeout()), this, SLOT(calculateAngle()));
-		angleTimer->start(1000);
-		
-		
-
-		if (rotateZState )
-			setZRotation(zRot + 4 * dx);
+	if (event->buttons() & Qt::LeftButton && rotateZState != -1) {
+		if (rotateZState == 1) {
+			if (clockWise)
+				setZRotation(zRot - 4);
+			else
+				setZRotation(zRot + 4);
+		}
 		else {
-			//setXRotation(xRot + 8 * dy);
-			//setYRotation(yRot + 8 * dx);
+			setXRotation(xRot + 4 * dy);
+			setYRotation(yRot + 4 * dx);
 		}
 	}
 	//Translation
 	else if (event->buttons() & Qt::RightButton) {
-		/*setXRotation(xRot + 8 * dy);
-		setZRotation(zRot + 8 * dx);*/
 		xTrans -= (float)dx / 5;
 		yTrans += (float)dy / 5;
 	}
@@ -130,22 +164,6 @@ void GLViewer::mouseMoveEvent(QMouseEvent *event) {
 
 }
 
-void GLViewer::calculateAngle() {
-	int x = abs(dx);
-	int y = abs(dy);
-	
-	if (x > 3 && y > 3) {
-		mouseMovementAngle = atan2(y, x);
-		mouseMovementAngle = mouseMovementAngle / (2 * M_PI) * 360;
-		rotateZState = 1;
-	}
-	else
-		rotateZState = 0;
-	//if (mouseMovementAngle > 45)
-	//	rotateZState = 1;
-	//else
-	//	rotateZState = 0;
-}
 
 void GLViewer::keyPressEvent(QKeyEvent *event) {
 }

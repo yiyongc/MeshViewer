@@ -25,7 +25,7 @@ public:
 
 private:
 	QTextBrowser* text;
-
+	GLViewer* glViewer;
 	Mesh* fileMesh;
 
 	Ui::MeshViewerClass ui;

@@ -2,7 +2,9 @@
 #define GLVIEWER_H
 
 #include <QGLWidget>
+#include <qopenglshaderprogram.h>
 #include <glut.h>
+#include "mesh.h"
 
 #define MODE_TRANSLATION 0
 #define MODE_ROTATION 1
@@ -17,11 +19,15 @@ class GLViewer : public QGLWidget {
 public:
 	GLViewer(QWidget* parent = 0);
 	~GLViewer();
+	void setModel(Mesh* model);
+	enum { eFragmentColor = 0x00FF00 };
 
 protected:
 	void initializeGL();
 	void paintGL();
 	void resizeGL(int width, int height);
+	void freeRenderData();
+
 
 	static void qNormalizeAngle(int &angle);
 
@@ -37,7 +43,8 @@ protected:
 	void drawPyramid();
 	void drawZAxis();
 	void drawAxis();
-
+	void drawModel();
+	
 private:
 	int xRot;
 	int yRot;
@@ -50,10 +57,28 @@ private:
 	int rotateZState = -1;
 	bool clockWise = false;
 
+	Mesh					m_model;
+	GLuint                  m_hVertexes;
+	GLuint                  m_hNormals;
+	QOpenGLShaderProgram    m_shaderProgram;
+	int                     m_coordVertex;
+	int                     m_coordNormal;
+	int                     m_matrixVertex;
+	int                     m_matrixNormal;
+	int                     m_colorFragment;
+
+private:
+	static float* generateVertexBuffer(Mesh& model);
+	static void generateNormalsBuffer(Mesh& model, float* coords);
+	static void releaseVertexBuffer(float* buffer);
+
+
 	public slots:
 	void setXRotation(int angle);
 	void setYRotation(int angle);
 	void setZRotation(int angle);
+
+
 
 
 

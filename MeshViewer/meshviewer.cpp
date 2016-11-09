@@ -26,7 +26,7 @@ MeshViewer::MeshViewer(QWidget *parent)
 
 
 	//Obtaining OpenGL widget
-	GLViewer* glViewer = new GLViewer;
+	glViewer = new GLViewer;
 	text = new QTextBrowser;
 
 
@@ -67,7 +67,7 @@ void MeshViewer::importNewFile(){
 		//ImportDialog* layerControllerSetting = new ImportDialog(m_LayerController, filename);
 		//layerControllerSetting->exec();
 		MFileParser fileParser(fileName, *fileMesh, text);
-
+		glViewer->setModel(fileMesh);
 	}
 
 }

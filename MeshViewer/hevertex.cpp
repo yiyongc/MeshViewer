@@ -25,3 +25,16 @@ void HE_vert::setEdge(HE_edge& e1) {
 HE_edge* HE_vert::getEdge() {
 	return edge;
 }
+
+float HE_vert::getX() {
+	return x;
+}
+
+float HE_vert::getY() {
+	return y;
+}
+
+float HE_vert::getZ() {
+	return z;
+}
+

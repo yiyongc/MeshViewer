@@ -42,6 +42,7 @@ MFileParser::MFileParser(QString fileName, Mesh& mesh, QTextBrowser* random) {
 
 	calculateEdgePairs();
 
+	m_mesh->computeVertexNormals();
 
 	random->setText("Done");
 

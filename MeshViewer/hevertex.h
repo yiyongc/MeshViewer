@@ -2,6 +2,7 @@
 
 #ifndef HE_VERTEX_INCLUDED
 #define HE_VERTEX_INCLUDED
+#include <qvector3d.h>
 
 //Forward declaration
 class HE_edge;
@@ -14,6 +15,10 @@ public:
 	int getID();
 	void setEdge(HE_edge& e1);
 	HE_edge* getEdge();
+	float getX();
+	float getY();
+	float getZ();
+	QVector3D computeNormal();
 
 private:
 	int vertexID;

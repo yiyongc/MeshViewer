@@ -23,17 +23,17 @@ GLViewer::GLViewer(QWidget* parent) : xRot(0), yRot(0), zRot(0), scaleSize(1.0),
 }
 
 GLViewer::~GLViewer() {
-	freeRenderData();
+	//freeRenderData();
 }
 
-void GLViewer::freeRenderData() {
-	QOpenGLFunctions funcs(QOpenGLContext::currentContext());
-	if (0 != m_hVertexes)
-	{
-		funcs.glDeleteBuffers(1, &m_hVertexes);
-		m_hVertexes = 0;
-	}
-}
+//void GLViewer::freeRenderData() {
+//	QOpenGLFunctions funcs(QOpenGLContext::currentContext());
+//	if (0 != m_hVertexes)
+//	{
+//		funcs.glDeleteBuffers(1, &m_hVertexes);
+//		m_hVertexes = 0;
+//	}
+//}
 
 
 
@@ -47,11 +47,25 @@ void GLViewer::initializeGL() {
 	//shading
 	//glShadeModel(GL_SMOOTH);
 	//glEnable(GL_LIGHTING);
+	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_MULTISAMPLE);
 
-	static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
-	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+	// Create light components.
+	GLfloat light_position[] = { 1.0, 1.0, 1.0, 1.0 }; // light position
+	GLfloat white_light[] = { 1.0, 1.0, 1.0, 1.0 }; // light color
+	GLfloat diffuse[] = { 0.3, 0.5, 0.6, 1.0 };
+	GLfloat lmodel_ambient[] = { 0.1, 0.1, 0.1, 1.0 };
+	
+	// Assign created components to GL_LIGHT0.
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, white_light);
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+
+
+	/*static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);*/
 }
 
 void GLViewer::paintGL() {
@@ -76,10 +90,11 @@ void GLViewer::paintGL() {
 	//drawPyramid();
 
 	//Model drawing functions
-	//drawModel(Smooth);
+	drawModel(Smooth);
 	//drawModel(Flat);
-	drawModelWire();
+	//drawModelWire();
 	//drawModelPoints();
+	drawBBox();
 }
 
 void GLViewer::resizeGL(int width, int height) {
@@ -100,7 +115,7 @@ void GLViewer::qNormalizeAngle(int &angle)
 }
 
 void GLViewer::setModel(Mesh* model) {
-	freeRenderData();
+	//freeRenderData();
 	if (model == nullptr)
 	{
 		return;
@@ -152,13 +167,13 @@ void GLViewer::mousePressEvent(QMouseEvent *event) {
 
 		QVector2D startPoint(this->mapFromGlobal(QCursor::pos()).x(), this->mapFromGlobal(QCursor::pos()).y());
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(120));
+		std::this_thread::sleep_for(std::chrono::milliseconds(150));
 		QVector2D firstPoint(this->mapFromGlobal(QCursor::pos()).x(), this->mapFromGlobal(QCursor::pos()).y());
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(120));
+		std::this_thread::sleep_for(std::chrono::milliseconds(150));
 		QVector2D secondPoint(this->mapFromGlobal(QCursor::pos()).x(), this->mapFromGlobal(QCursor::pos()).y());
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(120));
+		std::this_thread::sleep_for(std::chrono::milliseconds(150));
 		QVector2D thirdPoint(this->mapFromGlobal(QCursor::pos()).x(), this->mapFromGlobal(QCursor::pos()).y());
 
 		QVector2D vector1 = firstPoint - startPoint;
@@ -200,13 +215,6 @@ void GLViewer::mouseMoveEvent(QMouseEvent *event) {
 	dx = event->x() - lastPos.x();
 	dy = event->y() - lastPos.y();
 	
-	//Some pseudo code
-	//Using timer, take e.g. 3 mouse positions, pos1, pos2, pos3
-	//Use vector v1 (pos1) dot product vector v2 (pos2) to get angle between vectors
-	//repeat for vector v2 dot v3
-	//Using these angles given a threshold, we can determine if mouse is moving straight or in an arc
-	//Change rotation state and allow rotations
-
 	//Rotation
 	if (event->buttons() & Qt::LeftButton && rotateZState != -1) {
 		if (rotateZState == 1) {
@@ -279,32 +287,31 @@ void GLViewer::setZRotation(int angle)
 
 void GLViewer::drawGrid() {
 	qglColor(Qt::black);
-	
+	glEnable(GL_COLOR_MATERIAL);
 	glBegin(GL_LINES);
-	for (int i = -3; i <= 3; i++) {
-		glVertex3f((float) i, 0, -3);
-		glVertex3f((float)i, 0, 3);
-		glVertex3f(-3, 0, (float) i);
-		glVertex3f(3, 0, (float) i);
+	for (int i = -10; i <= 10; i++) {
+		glVertex3f((float) i, 0, -10);
+		glVertex3f((float)i, 0, 10);
+		glVertex3f(-10, 0, (float) i);
+		glVertex3f(10, 0, (float) i);
 	}
 	glEnd();
-
-
 }
 
 
 void GLViewer::drawZAxis() {
 	GLUquadric* gluQuad = gluNewQuadric();
-	gluCylinder(gluQuad, 0.01, 0.01, 2, 32, 32);
+	gluCylinder(gluQuad, 0.01, 0.01, 5, 32, 32);
 	glPushMatrix();
-	glTranslated(0, 0, 2);
-	glutSolidCone(0.02, 0.3, 32, 32);
+	glTranslated(0, 0, 5);
+	glutSolidCone(0.05, 0.3, 32, 32);
 	glPopMatrix();
 }
 
 void GLViewer::drawAxis() {
 	//X-axis
 	qglColor(Qt::darkRed);
+	glEnable(GL_COLOR_MATERIAL);
 	glPushMatrix();
 	glRotatef(90, 0, 1, 0);
 	drawZAxis();
@@ -312,6 +319,7 @@ void GLViewer::drawAxis() {
 
 	//Y-axis
 	qglColor(Qt::darkGreen);
+	glEnable(GL_COLOR_MATERIAL);
 	glPushMatrix();
 	glRotatef(-90, 1, 0, 0);
 	drawZAxis();
@@ -319,6 +327,7 @@ void GLViewer::drawAxis() {
 
 	//Z-axis
 	qglColor(Qt::darkBlue);
+	glEnable(GL_COLOR_MATERIAL);
 	drawZAxis();
 }
 
@@ -362,6 +371,17 @@ void GLViewer::drawModelPoints() {
 	if (m_model == nullptr)
 		return;
 
+	std::vector<HE_vert*> vertSrc = m_model->getVertices();
+	int vertCount = vertSrc.size();
+
+	int vertexCount = vertSrc.size();
+	qglColor(Qt::red);
+	glPointSize(5);
+	for (int i = 0; i < vertexCount; i++) {
+		glBegin(GL_POINTS);
+		glVertex3f(vertSrc.at(i)->getX(), vertSrc.at(i)->getY(), vertSrc.at(i)->getZ());
+		glEnd();
+	}
 	//// Set Shader Program object' parameters
 	////m_shaderProgram.setUniformValue(m_matrixVertex, matrixVertex);
 	////m_shaderProgram.setUniformValue(m_matrixNormal, m_matrixRotate);
@@ -393,28 +413,6 @@ void GLViewer::drawModelPoints() {
 	//funcs.glBindBuffer(GL_ARRAY_BUFFER, 0);
 	//glDisableClientState(GL_VERTEX_ARRAY);
 	//glDisableClientState(GL_NORMAL_ARRAY);
-
-	
-	
-
-
-	std::vector<HE_vert*> vertSrc = m_model->getVertices();
-	int vertCount = vertSrc.size();
-
-	
-
-
-	
-	int vertexCount = vertSrc.size();
-	qglColor(Qt::red);
-	glPointSize(5);
-	for (int i = 0; i < vertexCount; i++) {
-
-		glBegin(GL_POINTS);
-			glVertex3f(vertSrc.at(i)->getX(), vertSrc.at(i)->getY(), vertSrc.at(i)->getZ());
-		glEnd();
-	}
-
 }
 
 void GLViewer::drawModelWire() {
@@ -477,43 +475,90 @@ void GLViewer::drawModel(int shading) {
 	}
 }
 
-float* GLViewer::generateVertexBuffer(Mesh& model)
-{
-	const unsigned int vertexCount = model.getVertices().size();
-	float* pointCoord = new float[3 * vertexCount]();
-	float* abc = new float[3] {1, 2, 3};
-	if (0 != pointCoord)
-	{
-		//const unsigned int* indexes = model.GetIndexes();
-		std::vector<HE_vert*> pointCoordSrc = model.getVertices();
-		float* coord = pointCoord;
+//float* GLViewer::generateVertexBuffer(Mesh& model)
+//{
+//	const unsigned int vertexCount = model.getVertices().size();
+//	float* pointCoord = new float[3 * vertexCount]();
+//	float* abc = new float[3] {1, 2, 3};
+//	if (0 != pointCoord)
+//	{
+//		//const unsigned int* indexes = model.GetIndexes();
+//		std::vector<HE_vert*> pointCoordSrc = model.getVertices();
+//		float* coord = pointCoord;
+//		
+//		for (unsigned int vertex = 0; vertex < vertexCount; ++vertex) {
+//				HE_vert* coordSrc = pointCoordSrc.at(vertex);
+//				(*(coord++)) = (coordSrc->getX());
+//				(*(coord++)) = (coordSrc->getY());
+//				(*(coord++)) = (coordSrc->getZ());
+//		}
+//	}
+//
+//	return pointCoord;
+//}
+//
+//
+//void GLViewer::generateNormalsBuffer(Mesh& model, float* coords)
+//{
+//	std::vector<QVector3D> normalSrc = model.getNormals();
+//	
+//	for (unsigned int normal = 0; normal < normalSrc.size(); ++normal)
+//	{
+//		(*(coords++)) = normalSrc.at(normal).x();
+//		(*(coords++)) = normalSrc.at(normal).y();
+//		(*(coords++)) = normalSrc.at(normal).z();		
+//	}
+//}
+
+
+//void GLViewer::releaseVertexBuffer(float* buffer)
+//{
+//	delete[] buffer;
+//}
+
+
+void GLViewer::drawBBox() {
+	if (m_model == nullptr)
+		return;
+
+	float* bbox = m_model->getBBoxValue();
+
+
+	qglColor(Qt::black);
+	glLineWidth(1.2);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBegin(GL_QUADS);
+		glVertex3f(bbox[1], bbox[3], bbox[5]);
+		glVertex3f(bbox[1], bbox[3], bbox[6]);
+		glVertex3f(bbox[2], bbox[3], bbox[6]);
+		glVertex3f(bbox[2], bbox[3], bbox[5]);
+
+		glVertex3f(bbox[1], bbox[4], bbox[5]);
+		glVertex3f(bbox[1], bbox[4], bbox[6]);
+		glVertex3f(bbox[2], bbox[4], bbox[6]);
+		glVertex3f(bbox[2], bbox[4], bbox[5]);
 		
-		for (unsigned int vertex = 0; vertex < vertexCount; ++vertex) {
-				HE_vert* coordSrc = pointCoordSrc.at(vertex);
-				(*(coord++)) = (coordSrc->getX());
-				(*(coord++)) = (coordSrc->getY());
-				(*(coord++)) = (coordSrc->getZ());
-		}
-	}
+		glVertex3f(bbox[1], bbox[3], bbox[5]);
+		glVertex3f(bbox[1], bbox[3], bbox[6]);
+		glVertex3f(bbox[1], bbox[4], bbox[6]);
+		glVertex3f(bbox[1], bbox[4], bbox[5]);
 
-	return pointCoord;
-}
+		glVertex3f(bbox[2], bbox[3], bbox[5]);
+		glVertex3f(bbox[2], bbox[3], bbox[6]);
+		glVertex3f(bbox[2], bbox[4], bbox[6]);
+		glVertex3f(bbox[2], bbox[4], bbox[5]);
 
+		glVertex3f(bbox[1], bbox[3], bbox[5]);
+		glVertex3f(bbox[1], bbox[4], bbox[5]);
+		glVertex3f(bbox[2], bbox[4], bbox[5]);
+		glVertex3f(bbox[2], bbox[3], bbox[5]);
 
-void GLViewer::generateNormalsBuffer(Mesh& model, float* coords)
-{
-	std::vector<QVector3D> normalSrc = model.getNormals();
-	
-	for (unsigned int normal = 0; normal < normalSrc.size(); ++normal)
-	{
-		(*(coords++)) = normalSrc.at(normal).x();
-		(*(coords++)) = normalSrc.at(normal).y();
-		(*(coords++)) = normalSrc.at(normal).z();		
-	}
-}
+		glVertex3f(bbox[1], bbox[3], bbox[6]);
+		glVertex3f(bbox[1], bbox[4], bbox[6]);
+		glVertex3f(bbox[2], bbox[4], bbox[6]);
+		glVertex3f(bbox[2], bbox[3], bbox[6]);
 
+	glEnd();
+	glLineWidth(1);
 
-void GLViewer::releaseVertexBuffer(float* buffer)
-{
-	delete[] buffer;
 }

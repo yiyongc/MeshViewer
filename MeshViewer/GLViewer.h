@@ -21,7 +21,7 @@ public:
 	~GLViewer();
 	void setModel(Mesh* model);
 	enum {
-		eFragmentColor = 0x00FF00,
+		//eFragmentColor = 0x00FF00,
 		Flat = 1,
 		Smooth = 2
 	};
@@ -30,7 +30,7 @@ protected:
 	void initializeGL();
 	void paintGL();
 	void resizeGL(int width, int height);
-	void freeRenderData();
+	//void freeRenderData();
 
 
 	static void qNormalizeAngle(int &angle);
@@ -50,6 +50,7 @@ protected:
 	void drawModel(int shading);
 	void drawModelPoints();
 	void drawModelWire();
+	void drawBBox();
 	
 private:
 	int xRot;
@@ -73,10 +74,10 @@ private:
 	int                     m_matrixNormal;
 	int                     m_colorFragment;
 
-private:
-	static float* generateVertexBuffer(Mesh& model);
-	static void generateNormalsBuffer(Mesh& model, float* coords);
-	static void releaseVertexBuffer(float* buffer);
+//private:
+//	static float* generateVertexBuffer(Mesh& model);
+//	static void generateNormalsBuffer(Mesh& model, float* coords);
+//	static void releaseVertexBuffer(float* buffer);
 
 
 	public slots:

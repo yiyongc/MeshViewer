@@ -56,6 +56,8 @@ void MFileParser::convertToVertices() {
 	QString line;
 	QStringList lines;
 	QStringList vertData;
+	float x, y, z;
+	float minx = 0, maxx = 0, miny = 0, maxy = 0, minz = 0, maxz = 0;
 
 	lines = verticesData.split("\n");
 
@@ -64,10 +66,42 @@ void MFileParser::convertToVertices() {
 		line = lines[i];
 		vertData = line.split(",");
 
-		HE_vert* v1 = new HE_vert(vertData[0].toInt(), vertData[1].toFloat(), vertData[2].toFloat(), vertData[3].toFloat());
+		//Check x value
+		x = vertData[1].toFloat();
+		if (x < minx)
+			minx = x;
+		else if (x > maxx)
+			maxx = x;
+
+		//Check y value
+		y = vertData[2].toFloat();
+		if (y < miny)
+			miny = y;
+		else if (y > maxy)
+			maxy = y;
+
+		//Check z value
+		z = vertData[3].toFloat();
+		if (z < minz)
+			minz = z;
+		else if (z > maxz)
+			maxz = z;
+
+
+		//Create new vertex object to add to mesh
+		HE_vert* v1 = new HE_vert(vertData[0].toInt(), x, y, z);
 
 		m_mesh->addVertex(v1);
 	}
+	
+	//Store into mesh bbox values
+	float* bbox = m_mesh->getBBoxValue();
+	bbox[1] = minx;
+	bbox[2] = maxx;
+	bbox[3] = miny;
+	bbox[4] = maxy;
+	bbox[5] = minz;
+	bbox[6] = maxz;
 }
 
 void MFileParser::convertToFacesAndEdges() {

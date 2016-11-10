@@ -2,11 +2,16 @@
 
 
 Mesh::Mesh() {
-
+	//Initialize float array [minx, maxx, miny, maxy, minz, maxz]
+	bboxValue[1] = 0;
+	bboxValue[2] = 0;
+	bboxValue[3] = 0;
+	bboxValue[4] = 0;
+	bboxValue[5] = 0;
+	bboxValue[6] = 0;
 }
 
 Mesh::~Mesh() {
-
 }
 
 
@@ -69,4 +74,8 @@ void Mesh::computeVertexNormals() {
 
 		vertNormals.push_back(vertNormal / count);
 	}
+}
+
+float* Mesh::getBBoxValue() {
+	return bboxValue;
 }

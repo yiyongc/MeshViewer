@@ -18,6 +18,7 @@ public:
 	void addFace(HE_face* f1);
 	void addEdge(HE_edge* e1);
 	void computeVertexNormals();
+	float* getBBoxValue();
 
 private:
 	std::vector<HE_face*> faces;
@@ -25,6 +26,7 @@ private:
 	std::vector<HE_edge*> edges;
 	std::vector<QVector3D> vertNormals;
 
+	float bboxValue[6];
 	
 
 };

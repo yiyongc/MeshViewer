@@ -12,7 +12,8 @@ GLViewer::GLViewer(QWidget* parent) : xRot(0), yRot(0), zRot(0), scaleSize(1.0),
 , m_coordNormal(-1)
 , m_matrixVertex(-1)
 , m_matrixNormal(-1)
-, m_colorFragment(-1){
+, m_colorFragment(-1)
+, m_model(NULL) {
 
 	//Updates GL Widget every 10ms
 	QTimer* timer = new QTimer(this);
@@ -44,7 +45,7 @@ void GLViewer::initializeGL() {
 	//glEnable(GL_CULL_FACE);
 
 	//shading
-	glShadeModel(GL_SMOOTH);
+	//glShadeModel(GL_SMOOTH);
 	//glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_MULTISAMPLE);
@@ -73,7 +74,12 @@ void GLViewer::paintGL() {
 	drawGrid();
 	drawAxis();
 	//drawPyramid();
-	drawModel();
+
+	//Model drawing functions
+	//drawModel(Smooth);
+	//drawModel(Flat);
+	drawModelWire();
+	//drawModelPoints();
 }
 
 void GLViewer::resizeGL(int width, int height) {
@@ -100,9 +106,9 @@ void GLViewer::setModel(Mesh* model) {
 		return;
 	}
 	
-	m_model = *model;
+	m_model = model;
 
-	float* coords = generateVertexBuffer(m_model);
+	/*float* coords = generateVertexBuffer(m_model);
 
 	if (0 != coords)
 	{
@@ -113,14 +119,14 @@ void GLViewer::setModel(Mesh* model) {
 		{
 			funcs.glBindBuffer(GL_ARRAY_BUFFER, m_hVertexes);
 			funcs.glBufferData(GL_ARRAY_BUFFER,
-				(3 * m_model.getVertices().size() * sizeof(float)),
+				(3 * m_model->getVertices().size() * sizeof(float)),
 				coords,
 				GL_STATIC_DRAW);
 
 			generateNormalsBuffer(m_model, coords);
 			funcs.glBindBuffer(GL_ARRAY_BUFFER, m_hNormals);
 			funcs.glBufferData(GL_ARRAY_BUFFER,
-				(3 * m_model.getVertices().size() * sizeof(float)),
+				(3 * m_model->getVertices().size() * sizeof(float)),
 				coords,
 				GL_STATIC_DRAW);
 
@@ -131,7 +137,7 @@ void GLViewer::setModel(Mesh* model) {
 			freeRenderData();
 		}
 		releaseVertexBuffer(coords);
-	}
+	}*/
 }
 
 
@@ -352,11 +358,9 @@ void GLViewer::drawPyramid() {
 		glEnd();
 }
 
-void GLViewer::drawModel() {
-	if (m_hVertexes == 0)
-	{
+void GLViewer::drawModelPoints() {
+	if (m_model == nullptr)
 		return;
-	}
 
 	//// Set Shader Program object' parameters
 	////m_shaderProgram.setUniformValue(m_matrixVertex, matrixVertex);
@@ -393,11 +397,33 @@ void GLViewer::drawModel() {
 	
 	
 
-	std::vector<HE_face*> faceSrc = m_model.getFaces();
-	std::vector<QVector3D> normalSrc = m_model.getNormals();
-	std::vector<HE_vert*> vertSrc = m_model.getVertices();
-	int faceCount = faceSrc.size();
+
+	std::vector<HE_vert*> vertSrc = m_model->getVertices();
 	int vertCount = vertSrc.size();
+
+	
+
+
+	
+	int vertexCount = vertSrc.size();
+	qglColor(Qt::red);
+	glPointSize(5);
+	for (int i = 0; i < vertexCount; i++) {
+
+		glBegin(GL_POINTS);
+			glVertex3f(vertSrc.at(i)->getX(), vertSrc.at(i)->getY(), vertSrc.at(i)->getZ());
+		glEnd();
+	}
+
+}
+
+void GLViewer::drawModelWire() {
+	//Check if model exists
+	if (m_model == nullptr)
+		return;
+
+	std::vector<HE_face*> faceSrc = m_model->getFaces();
+	int faceCount = faceSrc.size();
 
 	qglColor(Qt::blue);
 	for (int j = 0; j < faceCount; j++)
@@ -408,11 +434,29 @@ void GLViewer::drawModel() {
 
 		glBegin(GL_LINE_LOOP);
 		// get the three vertices of f
-			glVertex3f(v1->getX(), v1->getY(), v1->getZ());
-			glVertex3f(v2->getX(), v2->getY(), v2->getZ());
-			glVertex3f(v3->getX(), v3->getY(), v3->getZ());
+		glVertex3f(v1->getX(), v1->getY(), v1->getZ());
+		glVertex3f(v2->getX(), v2->getY(), v2->getZ());
+		glVertex3f(v3->getX(), v3->getY(), v3->getZ());
 		glEnd();
 	}
+}
+
+void GLViewer::drawModel(int shading) {
+	//Check if model exists
+	if (m_model == nullptr)
+		return;
+
+	//Check shading type
+	if (shading == Flat) 
+		glShadeModel(GL_FLAT);
+	else if (shading = Smooth) 
+		glShadeModel(GL_SMOOTH);
+	else
+		return;
+
+	std::vector<HE_face*> faceSrc = m_model->getFaces();
+	std::vector<QVector3D> normalSrc = m_model->getNormals();
+	int faceCount = faceSrc.size();
 
 	qglColor(Qt::darkYellow);
 	for (int k = 0; k < faceCount; k++)	{
@@ -426,22 +470,11 @@ void GLViewer::drawModel() {
 
 		glBegin(GL_TRIANGLES);
 		// get both the normal and coordinates
-			glNormal3f(normal1.x(), normal1.y(), normal1.z()); glVertex3f(v1->getX(), v1->getY(), v1->getZ());
-			glNormal3f(normal2.x(), normal2.y(), normal2.z()); glVertex3f(v2->getX(), v2->getY(), v2->getZ());
-			glNormal3f(normal3.x(), normal3.y(), normal3.z()); glVertex3f(v3->getX(), v3->getY(), v3->getZ());
+		glNormal3f(normal1.x(), normal1.y(), normal1.z()); glVertex3f(v1->getX(), v1->getY(), v1->getZ());
+		glNormal3f(normal2.x(), normal2.y(), normal2.z()); glVertex3f(v2->getX(), v2->getY(), v2->getZ());
+		glNormal3f(normal3.x(), normal3.y(), normal3.z()); glVertex3f(v3->getX(), v3->getY(), v3->getZ());
 		glEnd();
 	}
-	
-	int vertexCount = vertSrc.size();
-	qglColor(Qt::red);
-	glPointSize(5);
-	for (int i = 0; i < vertexCount; i++) {
-
-		glBegin(GL_POINTS);
-			glVertex3f(vertSrc.at(i)->getX(), vertSrc.at(i)->getY(), vertSrc.at(i)->getZ());
-		glEnd();
-	}
-
 }
 
 float* GLViewer::generateVertexBuffer(Mesh& model)

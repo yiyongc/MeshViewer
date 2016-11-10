@@ -20,7 +20,11 @@ public:
 	GLViewer(QWidget* parent = 0);
 	~GLViewer();
 	void setModel(Mesh* model);
-	enum { eFragmentColor = 0x00FF00 };
+	enum {
+		eFragmentColor = 0x00FF00,
+		Flat = 1,
+		Smooth = 2
+	};
 
 protected:
 	void initializeGL();
@@ -43,7 +47,9 @@ protected:
 	void drawPyramid();
 	void drawZAxis();
 	void drawAxis();
-	void drawModel();
+	void drawModel(int shading);
+	void drawModelPoints();
+	void drawModelWire();
 	
 private:
 	int xRot;
@@ -57,7 +63,7 @@ private:
 	int rotateZState = -1;
 	bool clockWise = false;
 
-	Mesh					m_model;
+	Mesh*					m_model;
 	GLuint                  m_hVertexes;
 	GLuint                  m_hNormals;
 	QOpenGLShaderProgram    m_shaderProgram;
